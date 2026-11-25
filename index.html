@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Nebiz Store — каталог (демо)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Oswald:wght@500;700&family=JetBrains+Mono:wght@500;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* синя гама "Cobalt Nightfall" + крафт коробок */
+  --ink:#0A0F2C; --navy:#101B4D; --cobalt:#1E3A8A; --blue:#1D4ED8; --sky:#A7C7FF; --ice:#EEF2FF;
+  --kraft:#C49A6C; --kraft-d:#9C7246; --kraft-l:#DDBA8E;
+  --np:#DA291C; --me:#FFD21F;
+  --h:"Dela Gothic One",Impact,sans-serif; --c:"Oswald",sans-serif; --m:"JetBrains Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0!important;-webkit-tap-highlight-color:transparent}
+html{background:var(--ink)}
+body{background:var(--ink);color:var(--ice);font-family:var(--c);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+img{display:block;max-width:100%}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;
+  background:
+    linear-gradient(rgba(167,199,255,.06) 1px,transparent 1px) 0 0/28px 28px,
+    linear-gradient(90deg,rgba(167,199,255,.06) 1px,transparent 1px) 0 0/28px 28px,
+    radial-gradient(110% 60% at 50% 32%,#2B4AA8 0%,var(--navy) 45%,var(--ink) 100%);}
+.top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:2px solid rgba(167,199,255,.18)}
+.logo{font-family:var(--h);font-size:20px;letter-spacing:.02em}
+.logo span{color:var(--sky)}
+.demo{font-family:var(--m);font-weight:800;font-size:11px;letter-spacing:.15em;padding:5px 8px;background:var(--me);color:var(--ink);transform:rotate(-3deg)}
+.stage{position:relative;height:56svh;min-height:330px}
+#hoodie{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab}
+#hoodie:active{cursor:grabbing}
+.hint{position:absolute;left:16px;bottom:10px;font-family:var(--m);font-size:11px;letter-spacing:.12em;color:var(--sky);
+  border:2px solid var(--sky);padding:6px 9px;pointer-events:none;animation:blink 2.4s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+.ttn-hero{position:absolute;right:16px;top:12px;font-family:var(--m);font-size:10px;color:rgba(238,242,255,.6);text-align:right;line-height:1.6;pointer-events:none}
+.pitch{padding:8px 16px 28px}
+.pitch h1{font-family:var(--h);font-weight:400;font-size:clamp(34px,11vw,64px);line-height:.95;text-transform:uppercase}
+.pitch h1 em{font-style:normal;color:var(--ink);background:var(--sky);padding:0 .12em;display:inline-block;transform:skewX(-8deg)}
+.pitch p{margin-top:14px;font-size:17px;line-height:1.35;max-width:34ch;color:rgba(238,242,255,.85);font-weight:500}
+.pitch p b{color:var(--sky)}
+.scroll{margin-top:20px;display:flex;align-items:center;gap:10px;font-family:var(--m);font-size:12px;letter-spacing:.14em;color:var(--sky)}
+.scroll i{width:22px;height:22px;border:2px solid var(--sky);display:grid;place-items:center;font-style:normal;animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(5px)}}
+
+/* ---------- ПЕРЕХІД: ПОСИЛКИ ---------- */
+.drop{position:relative;height:190svh;background:linear-gradient(var(--ink),var(--navy) 60%,var(--ink))}
+.drop-stick{position:sticky;top:0;height:100svh;overflow:hidden;perspective:1100px;perspective-origin:50% 30%}
+.drop-title{position:absolute;top:13svh;left:0;right:0;text-align:center;font-family:var(--h);font-size:clamp(40px,14vw,90px);line-height:.9;
+  color:transparent;-webkit-text-stroke:2px var(--sky);text-transform:uppercase;transition:color .3s}
+.drop-title.arrived{color:var(--sky)}
+.track{position:absolute;top:calc(13svh + clamp(48px,15vw,96px));left:16px;right:16px;font-family:var(--m);font-size:11px;letter-spacing:.08em}
+.track .line{height:6px;background:rgba(167,199,255,.18);margin:10px 0 6px;position:relative}
+.track .line b{position:absolute;left:0;top:0;bottom:0;background:var(--sky);width:0}
+.track .pts{display:flex;justify-content:space-between;color:rgba(238,242,255,.7)}
+.track .pts span.on{color:var(--me)}
+.track .st{color:var(--sky)}
+.floor{position:absolute;left:0;right:0;bottom:0;height:16svh;background:
+  repeating-linear-gradient(90deg,rgba(167,199,255,.08) 0 1px,transparent 1px 40px),linear-gradient(var(--navy),var(--ink));
+  border-top:3px solid var(--sky)}
+
+.cube{position:absolute;left:50%;bottom:16svh;width:var(--w);height:var(--h);margin-left:calc(var(--w) / -2);transform-style:preserve-3d;will-change:transform}
+.cube .f{position:absolute;left:0;top:0;width:var(--w);height:var(--h);background:var(--kraft);border:1px solid var(--kraft-d);overflow:hidden}
+.cube .fr{transform:translateZ(calc(var(--d) / 2))}
+.cube .bk{transform:rotateY(180deg) translateZ(calc(var(--d) / 2))}
+.cube .rt,.cube .lt{width:var(--d);left:calc((var(--w) - var(--d)) / 2);background:var(--kraft-d)}
+.cube .rt{transform:rotateY(90deg) translateZ(calc(var(--w) / 2))}
+.cube .lt{transform:rotateY(-90deg) translateZ(calc(var(--w) / 2))}
+.cube .tp{height:var(--d);top:calc((var(--h) - var(--d)) / 2);background:var(--kraft-l);transform:rotateX(90deg) translateZ(calc(var(--h) / 2))}
+.cube .tp::after{content:"";position:absolute;top:0;bottom:0;left:50%;width:28%;transform:translateX(-50%)}
+.cube.np .tp::after{background:repeating-linear-gradient(0deg,var(--np) 0 14px,#fff 14px 16px)}
+.cube.me .tp::after{background:repeating-linear-gradient(0deg,var(--cobalt) 0 14px,var(--me) 14px 16px)}
+.cube .rt::after,.cube .lt::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.12),transparent)}
+/* фронт Нової Пошти */
+.npl{position:absolute;left:8%;top:12%;display:flex;align-items:center;gap:6px}
+.npl i{width:clamp(14px,22%,26px);aspect-ratio:1;background:var(--np);transform:rotate(45deg);flex:none;box-shadow:inset 0 0 0 3px var(--np),inset 0 0 0 5px #fff}
+.npl b{font-family:var(--c);font-weight:700;font-size:11px;line-height:1;color:#3a2a17;text-transform:lowercase}
+.ico{position:absolute;right:8%;bottom:10%;font-size:11px;color:#3a2a17;letter-spacing:2px;font-family:var(--m)}
+/* фронт Meest China */
+.mel{position:absolute;left:8%;top:10%;font-family:var(--h);font-size:14px;line-height:.9;color:var(--cobalt)}
+.mel small{display:block;font-family:var(--m);font-weight:800;font-size:8px;letter-spacing:.2em;color:#3a2a17;margin-top:3px}
+.mel small::before{content:"";display:inline-block;width:6px;height:6px;background:var(--me);margin-right:3px}
+.code{position:absolute;right:8%;bottom:10%;width:42%;height:26%;background:#fff;padding:3px}
+.code::after{content:"";position:absolute;inset:3px;background:repeating-linear-gradient(90deg,#111 0 1px,transparent 1px 3px,#111 3px 5px,transparent 5px 6px)}
+
+/* ---------- КАТАЛОГ ---------- */
+.cat{padding:28px 16px 60px;background:var(--ink)}
+.cat-h{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;border-bottom:3px solid var(--sky);padding-bottom:10px}
+.cat-h h2{font-family:var(--h);font-weight:400;font-size:clamp(30px,10vw,52px);line-height:.9;text-transform:uppercase}
+.cat-h small{font-family:var(--m);font-size:11px;color:var(--sky);text-align:right;line-height:1.5}
+
+/* пошук — як експрес-накладна */
+.search{margin-top:18px;background:var(--kraft);padding:8px;position:relative;box-shadow:6px 6px 0 var(--kraft-d)}
+.search::before{content:"";position:absolute;left:0;right:0;top:0;height:8px;background:repeating-linear-gradient(90deg,var(--np) 0 22px,#fff 22px 26px)}
+.search label{display:block;background:#fbf7ef;color:var(--ink);margin-top:8px;padding:8px 10px;border:2px solid #3a2a17}
+.search label span{display:flex;justify-content:space-between;font-family:var(--m);font-weight:800;font-size:10px;letter-spacing:.14em}
+.search input{width:100%;border:0;outline:0;background:transparent;font-family:var(--h);font-size:20px;color:var(--ink);padding-top:4px;text-transform:uppercase}
+.search input::placeholder{color:#b8ad99}
+
+/* фільтри — шматки скотчу */
+.filt{margin-top:16px;display:grid;gap:10px}
+.row-f{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:4px 2px 6px}
+.row-f::-webkit-scrollbar{display:none}
+.tape{flex:none;border:0;cursor:pointer;font-family:var(--c);font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.04em;
+  padding:8px 14px;background:var(--kraft-l);color:#3a2a17;position:relative;
+  clip-path:polygon(4px 0,100% 3px,calc(100% - 3px) 50%,100% calc(100% - 2px),3px 100%,0 55%);transition:transform .15s}
+.tape:active{transform:scale(.94)}
+.tape.on{background:var(--np);color:#fff}
+.tape.on.m{background:var(--me);color:var(--ink)}
+.tape.sz{font-family:var(--m);font-size:12px}
+.sort{display:flex;align-items:center;gap:10px;font-family:var(--m);font-size:11px;letter-spacing:.1em;color:var(--sky)}
+.sort select{flex:1;background:var(--navy);border:2px solid var(--sky);padding:8px;font-family:var(--c);font-weight:700;text-transform:uppercase;outline:0}
+.count{font-family:var(--m);font-size:11px;color:rgba(238,242,255,.6);margin:16px 0 10px}
+
+/* картки — коробки */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 14px}
+@media (min-width:720px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.card{position:relative;cursor:pointer;background:var(--kraft);border:2px solid var(--kraft-d);box-shadow:7px 7px 0 var(--kraft-d),7px 7px 0 2px #000;
+  opacity:0;transform:translateY(-40px) rotate(-2deg);transition:opacity .4s,transform .55s cubic-bezier(.3,1.6,.5,1)}
+.card.in{opacity:1;transform:none}
+.card:active{transform:translate(4px,4px);box-shadow:3px 3px 0 var(--kraft-d)}
+.card .strip{height:20px;overflow:hidden;white-space:nowrap;font-family:var(--c);font-weight:700;font-size:11px;line-height:20px;letter-spacing:.08em;text-transform:uppercase}
+.card.np .strip{background:var(--np);color:#fff}
+.card.me .strip{background:var(--cobalt);color:var(--me)}
+.card .strip span{display:inline-block;animation:run 9s linear infinite}
+@keyframes run{to{transform:translateX(-50%)}}
+.ph{margin:8px;aspect-ratio:1/1.02;position:relative;overflow:hidden;
+  background:linear-gradient(rgba(29,78,216,.09) 1px,transparent 1px) 0 0/16px 16px,linear-gradient(90deg,rgba(29,78,216,.09) 1px,transparent 1px) 0 0/16px 16px,var(--ice);
+  box-shadow:inset 0 0 0 2px var(--kraft-d),inset 0 10px 18px rgba(58,42,23,.35)}
+.ph img{width:100%;height:100%;object-fit:contain;padding:6%}
+.badge{position:absolute;top:8px;right:-4px;font-family:var(--m);font-weight:800;font-size:10px;letter-spacing:.1em;padding:4px 7px;background:var(--me);color:var(--ink)}
+.badge.sale{background:var(--np);color:#fff}
+.lbl{margin:0 8px 8px;background:#fbf7ef;color:var(--ink);padding:8px;border:2px solid #3a2a17}
+.lbl .ttn{font-family:var(--m);font-size:9px;letter-spacing:.06em;color:#6d6353}
+.lbl h3{font-family:var(--c);font-weight:700;font-size:15px;line-height:1.1;text-transform:uppercase;margin:4px 0 6px;min-height:2.2em}
+.lbl .pr{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.lbl .pr b{font-family:var(--h);font-weight:400;font-size:18px;color:var(--blue)}
+.lbl .pr s{font-family:var(--m);font-size:11px;color:#8c826f}
+.lbl .bar{height:16px;margin-top:6px;background:repeating-linear-gradient(90deg,#111 0 2px,transparent 2px 4px,#111 4px 5px,transparent 5px 8px,#111 8px 11px,transparent 11px 12px)}
+.empty{grid-column:1/-1;text-align:center;font-family:var(--h);font-size:22px;padding:40px 0;color:var(--sky)}
+.foot{text-align:center;font-family:var(--m);font-size:10px;color:rgba(238,242,255,.45);padding:30px 16px 40px;letter-spacing:.1em}
+
+/* ---------- МОДАЛКА: ЗАЗИРАЄМО В КОРОБКУ ---------- */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(10,15,44,.92);overflow-y:auto;overscroll-behavior:contain;
+  visibility:hidden;opacity:0;transition:opacity .25s,visibility 0s .25s}
+.modal.open{visibility:visible;opacity:1;transition:opacity .25s}
+.mwrap{max-width:560px;margin:0 auto;padding:16px 16px 40px}
+.mtop{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.mtop .ttn{font-family:var(--m);font-size:11px;color:var(--sky);letter-spacing:.08em}
+.x{width:40px;height:40px;border:2px solid var(--sky);background:transparent;font-family:var(--h);font-size:18px;cursor:pointer}
+.crate{position:relative;margin:46px 34px 30px;perspective:700px}
+.rim{position:relative;background:var(--kraft);padding:16px;border:2px solid var(--kraft-d);
+  box-shadow:0 26px 40px rgba(0,0,0,.5)}
+.inside{position:relative;background:#6e4f2e;box-shadow:inset 0 22px 30px rgba(0,0,0,.65),inset 0 -6px 14px rgba(0,0,0,.4),inset 14px 0 20px rgba(0,0,0,.35),inset -14px 0 20px rgba(0,0,0,.35);padding:10px}
+.flap{position:absolute;background:var(--kraft-l);border:2px solid var(--kraft-d);transition:transform .7s cubic-bezier(.2,1.4,.4,1);backface-visibility:visible}
+.flap::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.08),transparent)}
+.flap.t{left:0;right:0;height:46px;bottom:100%;transform-origin:50% 100%;transform:rotateX(-178deg)}
+.flap.b{left:0;right:0;height:30px;top:100%;transform-origin:50% 0;transform:rotateX(178deg)}
+.flap.l{top:0;bottom:0;width:34px;right:100%;transform-origin:100% 50%;transform:rotateY(178deg)}
+.flap.r{top:0;bottom:0;width:34px;left:100%;transform-origin:0 50%;transform:rotateY(-178deg)}
+.modal.open .flap.t{transform:rotateX(-28deg);transition-delay:.15s}
+.modal.open .flap.b{transform:rotateX(30deg);transition-delay:.25s}
+.modal.open .flap.l{transform:rotateY(-30deg);transition-delay:.05s}
+.modal.open .flap.r{transform:rotateY(30deg);transition-delay:.1s}
+.flap.t.np-tape{background:linear-gradient(90deg,transparent 40%,var(--np) 40% 60%,transparent 60%),var(--kraft-l)}
+.flap.t.me-tape{background:linear-gradient(90deg,transparent 40%,var(--cobalt) 40% 60%,transparent 60%),var(--kraft-l)}
+.gal{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;background:
+  linear-gradient(rgba(29,78,216,.09) 1px,transparent 1px) 0 0/18px 18px,linear-gradient(90deg,rgba(29,78,216,.09) 1px,transparent 1px) 0 0/18px 18px,var(--ice);
+  opacity:0;transform:translateY(30px) scale(.92);transition:opacity .4s .35s,transform .6s .35s cubic-bezier(.2,1.4,.4,1)}
+.modal.open .gal{opacity:1;transform:none}
+.gal::-webkit-scrollbar{display:none}
+.gal img{flex:0 0 100%;scroll-snap-align:center;aspect-ratio:1/1.02;object-fit:contain;padding:6%}
+.dots{display:flex;gap:6px;justify-content:center;padding-top:10px}
+.dots button{width:46px;height:46px;border:2px solid var(--kraft-d);background:var(--ice);padding:2px;cursor:pointer;opacity:.6}
+.dots button.on{opacity:1;border-color:var(--me);box-shadow:0 0 0 2px var(--ink)}
+.dots img{width:100%;height:100%;object-fit:contain}
+.slip{background:#fbf7ef;color:var(--ink);padding:18px 16px;position:relative;box-shadow:8px 8px 0 var(--cobalt)}
+.slip::before{content:"";position:absolute;left:0;right:0;top:-8px;height:8px;background:linear-gradient(-45deg,#fbf7ef 4px,transparent 0) 0 0/10px 8px,linear-gradient(45deg,#fbf7ef 4px,transparent 0) 0 0/10px 8px}
+.slip .k{font-family:var(--m);font-size:10px;font-weight:800;letter-spacing:.16em;color:#6d6353}
+.slip h2{font-family:var(--h);font-weight:400;font-size:26px;line-height:1;text-transform:uppercase;margin:6px 0 10px}
+.slip .pr{display:flex;align-items:baseline;gap:10px;padding-bottom:14px;border-bottom:2px dashed #3a2a17}
+.slip .pr b{font-family:var(--h);font-weight:400;font-size:34px;color:var(--blue)}
+.slip .pr s{font-family:var(--m);font-size:14px;color:#8c826f}
+.slip .sec{padding:14px 0;border-bottom:2px dashed #3a2a17}
+.szs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.szs button{min-width:50px;height:44px;border:2px solid var(--ink);background:transparent;font-family:var(--m);font-weight:800;font-size:14px;cursor:pointer}
+.szs button.on{background:var(--ink);color:var(--me)}
+.szs button:disabled{opacity:.3;text-decoration:line-through;cursor:not-allowed}
+.szs.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.desc{font-size:16px;line-height:1.4;margin-top:6px;font-weight:500}
+.spec{width:100%;border-collapse:collapse;font-family:var(--m);font-size:12px;margin-top:6px}
+.spec td{padding:6px 0;border-bottom:1px solid #d9d0bd}
+.spec td:last-child{text-align:right;font-weight:800}
+.buy{margin-top:16px;width:100%;height:56px;border:0;background:var(--blue);color:#fff;font-family:var(--h);font-size:18px;text-transform:uppercase;cursor:pointer;
+  box-shadow:5px 5px 0 var(--ink);transition:transform .1s,box-shadow .1s}
+.buy:active{transform:translate(5px,5px);box-shadow:0 0 0 var(--ink)}
+.note{font-family:var(--m);font-size:10px;color:#6d6353;text-align:center;margin-top:12px;letter-spacing:.06em}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01s!important}}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <header class="top">
+    <div class="logo">NEBIZ<span>.</span>STORE</div>
+    <div class="demo">ДЕМО</div>
+  </header>
+  <div class="stage">
+    <canvas id="hoodie" aria-label="Худі Nebiz — потягни або натисни"></canvas>
+    <div class="ttn-hero">ТТН 2045 0000 7777<br>СТАТУС: КОФТА НА МІСЦІ</div>
+    <div class="hint">☝ ПОТЯГНИ КОФТУ</div>
+  </div>
+  <div class="pitch">
+    <h1>Не бізнес.<br><em>Nebiz.</em></h1>
+    <p>Кофти, що пролетіли <b>7&nbsp;000&nbsp;км</b> у коробці Meest China, пересіли на Нову Пошту й нарешті доїхали до тебе. Тепло не розгубили — перевір обіймами.</p>
+    <div class="scroll"><i>↓</i> ГОРТАЙ — ПОСИЛКИ ВЖЕ ЇДУТЬ</div>
+  </div>
+</section>
+
+<section class="drop" id="drop">
+  <div class="drop-stick">
+    <div class="drop-title" id="dropTitle">В дорозі</div>
+    <div class="track">
+      <div class="st" id="trackSt">ВІДПРАВЛЕННЯ ПРИЙНЯТО · ГУАНЧЖОУ</div>
+      <div class="line"><b id="trackBar"></b></div>
+      <div class="pts"><span id="p0" class="on">КИТАЙ</span><span id="p1">ЛЬВІВ</span><span id="p2">ВІДДІЛЕННЯ</span><span id="p3">ТИ</span></div>
+    </div>
+    <div class="floor"></div>
+    <div id="pile"></div>
+  </div>
+</section>
+
+<section class="cat" id="cat">
+  <div class="cat-h">
+    <h2>Каталог</h2>
+    <small>СКЛАД №1<br>ПРИЙМАННЯ: СЬОГОДНІ</small>
+  </div>
+
+  <div class="search">
+    <label>
+      <span><em style="font-style:normal">ЕКСПРЕС-НАКЛАДНА · ПОШУК</em><em style="font-style:normal">№ ____</em></span>
+      <input id="q" type="search" placeholder="Худі, синій, зіп…" autocomplete="off">
+    </label>
+  </div>
+
+  <div class="filt">
+    <div class="row-f" id="fCat"></div>
+    <div class="row-f" id="fSize"></div>
+    <label class="sort">СОРТ:
+      <select id="sort">
+        <option value="pop">Популярні</option>
+        <option value="asc">Спершу дешевші</option>
+        <option value="desc">Спершу дорожчі</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+  <div class="foot">NEBIZ STORE · ДЕМО-ВЕРСІЯ КАТАЛОГУ · ФОТО ТА ЦІНИ УМОВНІ</div>
+</section>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true">
+  <div class="mwrap">
+    <div class="mtop"><span class="ttn" id="mTtn"></span><button class="x" id="mClose" aria-label="Закрити">✕</button></div>
+    <div class="crate">
+      <i class="flap l"></i><i class="flap r"></i><i class="flap t" id="mFlap"></i><i class="flap b"></i>
+      <div class="rim"><div class="inside"><div class="gal" id="gal"></div></div></div>
+    </div>
+    <div class="dots" id="dots"></div>
+    <div class="slip" id="slip" style="margin-top:26px"></div>
+  </div>
+</div>
+
+<script>
+const tg = window.Telegram && Telegram.WebApp;
+if (tg) {
+  tg.ready(); tg.expand();
+  try { tg.setHeaderColor('#0A0F2C'); tg.setBackgroundColor('#0A0F2C'); } catch (e) {}
+  if (tg.disableVerticalSwipes) tg.disableVerticalSwipes(); // інакше тягання кофти згортає міні-апп
+}
+const haptic = (t = 'light') => tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred(t);
+const $ = s => document.querySelector(s);
+const uah = n => n.toLocaleString('uk-UA') + ' ₴';
+
+/* ---------- ДАНІ (демо) ---------- */
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const PRODUCTS = [
+  {id: 1, name: 'Худі «Синій Кит»', cat: 'Худі', price: 1890, old: 2190, badge: 'ХІТ', col: 'Кобальт', c: '#2354D6', d: '#16338A', l: '#4D7BF0', ink: '#EEF2FF', hood: 1, pocket: 1, sizes: ['S', 'M', 'L', 'XL'], pop: 9,
+    desc: 'Головна кофта магазину. Важкий футер, щільний капюшон і кишеня-кенгуру, в яку влізе і телефон, і долоні взимку.'},
+  {id: 2, name: 'Худі «Ніч над Дніпром»', cat: 'Худі', price: 2190, badge: 'НОВЕ', col: 'Темно-синій', c: '#1A2457', d: '#0E1538', l: '#2E3D80', ink: '#A7C7FF', hood: 1, pocket: 1, sizes: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], pop: 8,
+    desc: 'Глибокий нічний синій з блакитним принтом. Оверсайз-посадка, плече спущене, рукав з довгою манжетою.'},
+  {id: 3, name: 'Світшот «Лід»', cat: 'Світшоти', price: 1490, col: 'Крижаний', c: '#CFDDFB', d: '#9FB4E0', l: '#EAF1FF', ink: '#101B4D', hood: 0, pocket: 0, sizes: ['XS', 'S', 'M', 'L'], pop: 7,
+    desc: 'Світлий світшот без зайвого: рівний крій, круглий виріз, рубчик на манжетах і поясі. Носиться з усім.'},
+  {id: 4, name: 'Зіп-худі «Шторм»', cat: 'Зіп-худі', price: 2390, badge: 'ХІТ', col: 'Сталевий синій', c: '#3E5C8F', d: '#273C62', l: '#5D7DB3', ink: '#EEF2FF', hood: 1, pocket: 1, zip: 1, sizes: ['M', 'L', 'XL', 'XXL'], pop: 6,
+    desc: 'Зіп-худі на металевій блискавці. Знімається за секунду, тримає вітер, принт на грудях і великий на спині.'},
+  {id: 5, name: 'Худі «Молоко»', cat: 'Худі', price: 1990, col: 'Молочний', c: '#ECEBE6', d: '#C2C0B8', l: '#FFFFFF', ink: '#1D4ED8', hood: 1, pocket: 1, sizes: ['XS', 'S', 'M'], pop: 5,
+    desc: 'Молочне худі з кобальтовим принтом. М’який начос усередині, подвійний капюшон тримає форму.'},
+  {id: 6, name: 'Світшот «Блакить»', cat: 'Світшоти', price: 1390, old: 1650, badge: '−15%', col: 'Блакитний', c: '#7FA8F2', d: '#557FC9', l: '#A7C7FF', ink: '#0A0F2C', hood: 0, pocket: 0, sizes: ['S', 'M', 'L', 'XL'], pop: 4,
+    desc: 'Небесний світшот для тих, хто любить яскравіше. Легший футер — на міжсезоння саме те.'},
+  {id: 7, name: 'Зіп-худі «Графіт»', cat: 'Зіп-худі', price: 2290, col: 'Графіт', c: '#2C303B', d: '#191C24', l: '#434958', ink: '#A7C7FF', hood: 1, pocket: 1, zip: 1, sizes: ['S', 'M', 'L', 'XL', 'XXL'], pop: 3,
+    desc: 'Темний графіт з блакитним акцентом. Базова річ, яка витримає і дорогу з Китаю, і твій щоденний ритм.'},
+  {id: 8, name: 'Худі «Пісок»', cat: 'Худі', price: 1790, old: 2090, badge: '−15%', col: 'Пісочний', c: '#D8C3A0', d: '#B39C77', l: '#EBDCC1', ink: '#1E3A8A', hood: 1, pocket: 1, sizes: ['M', 'L'], pop: 2,
+    desc: 'Колір крафтової коробки, в якій вона приїхала. Тепла, щільна, з синім принтом на спині.'},
+];
+PRODUCTS.forEach((p, i) => { p.car = i % 2 ? 'me' : 'np'; p.ttn = '2045 ' + String(4710 + p.id * 37).padStart(4, '0') + ' ' + String(1000 + p.id * 913).slice(0, 4); });
+
+/* ---------- МАЛЮЄМО КОФТУ (SVG → canvas) ---------- */
+function hoodieSVG(o, back) {
+  const rib = [];
+  for (let x = 166; x <= 434; x += 8) rib.push(`M${x} 572L${x} 604`);
+  const front = !back;
+  const hoodFront = o.hood && front ? `
+    <path d="M195 150Q190 55 300 38Q410 55 405 150Q350 190 300 196Q250 190 195 150Z" fill="url(#s)" stroke="${o.d}" stroke-width="3"/>
+    <path d="M238 150Q240 88 300 80Q360 88 362 150Q330 178 300 181Q270 178 238 150Z" fill="#070b1f" opacity=".82"/>
+    <path d="M246 112Q300 60 354 112" stroke="${o.l}" stroke-width="3" fill="none" opacity=".5"/>` : '';
+  const hoodBack = o.hood && back ? `
+    <path d="M212 138Q300 118 388 138L372 305Q300 335 228 305Z" fill="url(#s)" stroke="${o.d}" stroke-width="3"/>
+    <path d="M300 126L300 322" stroke="${o.d}" stroke-width="3" stroke-dasharray="6 5"/>` : '';
+  const crew = !o.hood ? (front
+    ? `<path d="M232 132Q300 118 368 132Q352 176 300 178Q248 176 232 132Z" fill="${o.d}"/><path d="M247 134Q300 125 353 134Q338 160 300 162Q262 160 247 134Z" fill="#070b1f" opacity=".6"/>`
+    : `<path d="M232 132Q300 118 368 132Q300 146 232 132Z" fill="${o.d}"/>`) : '';
+  const strings = o.hood && front && !o.zip ? `
+    <path d="M282 186Q278 240 276 300" stroke="${o.l}" stroke-width="5" fill="none"/><path d="M318 186Q322 240 324 300" stroke="${o.l}" stroke-width="5" fill="none"/>
+    <rect x="271" y="298" width="10" height="20" fill="#11182f"/><rect x="319" y="298" width="10" height="20" fill="#11182f"/>` : '';
+  const pocket = o.pocket && front ? `
+    <path d="M214 410L386 410L406 508L194 508Z" fill="${o.c}" stroke="${o.d}" stroke-width="3"/>
+    <path d="M214 410L194 470M386 410L406 470" stroke="${o.d}" stroke-width="4"/>
+    <path d="M220 418L380 418" stroke="${o.d}" stroke-width="2" stroke-dasharray="5 5" opacity=".6"/>` : '';
+  const zip = o.zip && front ? `
+    <path d="M300 ${o.hood ? 186 : 170}L300 606" stroke="#1b1f2a" stroke-width="8"/>
+    <path d="M300 ${o.hood ? 186 : 170}L300 606" stroke="#c6ccda" stroke-width="12" stroke-dasharray="2 4" opacity=".55"/>
+    <rect x="293" y="200" width="14" height="34" fill="#c6ccda" stroke="#1b1f2a" stroke-width="2"/>` : '';
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 640" width="600" height="640">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1"><stop offset="0" stop-color="${o.d}"/><stop offset=".3" stop-color="${o.c}"/><stop offset=".55" stop-color="${o.l}"/><stop offset=".75" stop-color="${o.c}"/><stop offset="1" stop-color="${o.d}"/></linearGradient>
+    <linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${o.l}"/><stop offset=".5" stop-color="${o.c}"/><stop offset="1" stop-color="${o.d}"/></linearGradient>
+  </defs>
+  <g stroke-linejoin="miter">
+  <path d="M205 140L130 175Q85 200 72 290L48 500L112 508L140 330L168 255Z" fill="url(#s)" stroke="${o.d}" stroke-width="3"/>
+  <path d="M395 140L470 175Q515 200 528 290L552 500L488 508L460 330L432 255Z" fill="url(#s)" stroke="${o.d}" stroke-width="3"/>
+  <path d="M48 500L112 508L108 548L42 540Z" fill="${o.d}"/><path d="M552 500L488 508L492 548L558 540Z" fill="${o.d}"/>
+  <path d="M95 320Q118 335 104 372M86 410Q110 420 98 455M505 320Q482 335 496 372M514 410Q490 420 502 455" stroke="${o.d}" stroke-width="3" fill="none" opacity=".55"/>
+  <path d="M200 138Q300 118 400 138L432 255L440 568Q300 584 160 568L168 255Z" fill="url(#g)" stroke="${o.d}" stroke-width="3"/>
+  <path d="M188 290Q206 380 196 470M412 290Q394 380 404 470M168 255Q190 270 205 300M432 255Q410 270 395 300" stroke="${o.d}" stroke-width="3" fill="none" opacity=".4"/>
+  <path d="M160 568Q300 584 440 568L438 608Q300 624 162 608Z" fill="${o.d}"/>
+  <path d="${rib.join('')}" stroke="#000" stroke-width="2" opacity=".18"/>
+  ${hoodBack}${crew}${hoodFront}${strings}${pocket}${zip}
+  </g></svg>`;
+}
+
+function loadImg(src) {
+  return new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+}
+
+async function makeTex(o, back, scale = 1) {
+  const img = await loadImg('data:image/svg+xml;charset=utf-8,' + encodeURIComponent(hoodieSVG(o, back)));
+  const cv = document.createElement('canvas');
+  cv.width = 600 * scale; cv.height = 640 * scale;
+  const x = cv.getContext('2d');
+  x.scale(scale, scale);
+  x.drawImage(img, 0, 0, 600, 640);
+  x.fillStyle = o.ink; x.textAlign = 'center'; x.textBaseline = 'alphabetic';
+  const txt = (t, px, py, size, font = '"Dela Gothic One"', ls = 0) => {
+    x.font = `${size}px ${font}`;
+    if ('letterSpacing' in x) x.letterSpacing = ls + 'px';
+    x.fillText(t, px, py);
+  };
+  if (!back) {
+    if (o.zip) { txt('NEBIZ', 370, 290, 26); }
+    else if (o.hood) { txt('NEBIZ', 300, 372, 46); txt('STORE · UA', 300, 395, 14, '"JetBrains Mono"', 4); }
+    else { txt('NEBIZ', 300, 300, 58); txt('НЕ БІЗНЕС', 300, 330, 16, '"JetBrains Mono"', 5); }
+  } else {
+    const y = o.hood ? 420 : 340;
+    txt('NEBIZ', 300, y, 92); txt('STORE · UA · 2026', 300, y + 34, 18, '"JetBrains Mono"', 5);
+  }
+  return cv;
+}
+
+function cropDetail(tex, o) {
+  const cv = document.createElement('canvas'); cv.width = 600; cv.height = 640;
+  const sx = tex.width / 600;
+  const [x, y] = o.zip ? [270, 180] : o.hood ? [170, 230] : [150, 170];
+  cv.getContext('2d').drawImage(tex, x * sx, y * sx, 280 * sx, 300 * sx, 0, 0, 600, 640);
+  return cv;
+}
+
+/* ---------- ЖЕЛЕЙНА КОФТА: сітка з пружинами ---------- */
+function affine(x0, y0, x1, y1, x2, y2, u0, v0, u1, v1, u2, v2) {
+  const den = (u0 - u2) * (v1 - v2) - (u1 - u2) * (v0 - v2);
+  const a = ((x0 - x2) * (v1 - v2) - (x1 - x2) * (v0 - v2)) / den;
+  const c = ((x1 - x2) * (u0 - u2) - (x0 - x2) * (u1 - u2)) / den;
+  const b = ((y0 - y2) * (v1 - v2) - (y1 - y2) * (v0 - v2)) / den;
+  const d = ((y1 - y2) * (u0 - u2) - (y0 - y2) * (u1 - u2)) / den;
+  return [a, b, c, d, x2 - a * u2 - c * v2, y2 - b * u2 - d * v2];
+}
+{ // self-check: точка (u1,v1) має потрапити в (x1,y1)
+  const m = affine(10, 20, 110, 25, 15, 130, 0, 0, 50, 0, 0, 50);
+  console.assert(Math.abs(m[0] * 50 + m[4] - 110) < 1e-9 && Math.abs(m[1] * 50 + m[5] - 25) < 1e-9, 'affine broken');
+}
+
+function jelly(cv, tex) {
+  const ctx = cv.getContext('2d');
+  const COLS = 12, ROWS = 13, K = 0.11, DAMP = 0.84;
+  let pts = [], solid = [], W, H, R, dpr, pat = ctx.createPattern(tex, 'no-repeat');
+  let down = null, energy = 1, raf = 0, lastTouch = performance.now();
+
+  // які клітинки текстури взагалі непрозорі — порожні не малюємо
+  const probe = document.createElement('canvas'); probe.width = COLS * 6; probe.height = ROWS * 6;
+  const pc = probe.getContext('2d'); pc.drawImage(tex, 0, 0, probe.width, probe.height);
+  const al = pc.getImageData(0, 0, probe.width, probe.height).data;
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    let any = false;
+    for (let y = 0; y < 6 && !any; y++) for (let x = 0; x < 6; x++) if (al[((r * 6 + y) * probe.width + c * 6 + x) * 4 + 3] > 4) { any = true; break; }
+    solid[r * COLS + c] = any;
+  }
+
+  function layout() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    W = cv.clientWidth * dpr; H = cv.clientHeight * dpr;
+    cv.width = W; cv.height = H;
+    const s = Math.min(W / 600, H / 640) * 0.94, iw = 600 * s, ih = 640 * s, ix = (W - iw) / 2, iy = (H - ih) / 2;
+    R = iw * 0.22;
+    pts = [];
+    for (let r = 0; r <= ROWS; r++) for (let c = 0; c <= COLS; c++) {
+      const x = ix + iw * c / COLS, y = iy + ih * r / ROWS;
+      pts.push({x, y, ox: x, oy: y, vx: 0, vy: 0, u: tex.width * c / COLS, v: tex.height * r / ROWS});
+    }
+    kick();
+  }
+
+  function tri(p0, p1, p2) {
+    pat.setTransform(new DOMMatrix(affine(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, p0.u, p0.v, p1.u, p1.v, p2.u, p2.v)));
+    // трохи роздуваємо трикутник, щоб не було щілин між сусідами
+    const cx = (p0.x + p1.x + p2.x) / 3, cy = (p0.y + p1.y + p2.y) / 3, e = 0.9;
+    const g = p => { const dx = p.x - cx, dy = p.y - cy, l = Math.hypot(dx, dy) || 1; return [p.x + dx / l * e, p.y + dy / l * e]; };
+    const a = g(p0), b = g(p1), c = g(p2);
+    ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.closePath(); ctx.fill();
+  }
+
+  function frame() {
+    raf = 0;
+    energy = 0;
+    for (const p of pts) {
+      p.vx = (p.vx + (p.ox - p.x) * K) * DAMP; p.vy = (p.vy + (p.oy - p.y) * K) * DAMP;
+      if (!down) { p.x += p.vx; p.y += p.vy; }
+      energy += Math.abs(p.vx) + Math.abs(p.vy) + Math.abs(p.ox - p.x) + Math.abs(p.oy - p.y);
+    }
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = pat;
+    const n = COLS + 1;
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      if (!solid[r * COLS + c]) continue;
+      const a = pts[r * n + c], b = pts[r * n + c + 1], d = pts[(r + 1) * n + c], e = pts[(r + 1) * n + c + 1];
+      tri(a, b, e); tri(a, e, d);
+    }
+    if (down || energy > pts.length * 0.01) kick();
+  }
+  const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
+
+  function pos(ev) { const b = cv.getBoundingClientRect(); return [(ev.clientX - b.left) * dpr, (ev.clientY - b.top) * dpr]; }
+  function poke(mx, my, force) {
+    for (const p of pts) {
+      const dx = p.x - mx, dy = p.y - my, d2 = dx * dx + dy * dy, l = Math.sqrt(d2) || 1;
+      const w = Math.exp(-d2 / (R * R));
+      p.vx += dx / l * w * force; p.vy += dy / l * w * force;
+    }
+    kick();
+  }
+  cv.addEventListener('pointerdown', ev => {
+    cv.setPointerCapture(ev.pointerId);
+    const [x, y] = pos(ev);
+    down = {x, y}; lastTouch = performance.now();
+    poke(x, y, -14 * dpr); // ямка від пальця
+    for (const p of pts) { p.x += p.vx; p.y += p.vy; }
+    haptic('soft');
+  });
+  cv.addEventListener('pointermove', ev => {
+    if (!down) return;
+    const [x, y] = pos(ev), dx = x - down.x, dy = y - down.y;
+    for (const p of pts) {
+      const ddx = p.x - x, ddy = p.y - y, w = Math.exp(-(ddx * ddx + ddy * ddy) / (R * R * 1.4));
+      p.x += dx * w * 0.9; p.y += dy * w * 0.9;
+    }
+    down = {x, y}; kick();
+  });
+  const up = () => {
+    if (!down) return;
+    down = null; lastTouch = performance.now();
+    for (const p of pts) { p.vx = 0; p.vy = 0; }
+    haptic('light'); kick();
+  };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+
+  // сама "дихає", поки ніхто не чіпає — щоб було видно, що вона жива
+  setInterval(() => {
+    if (down || performance.now() - lastTouch < 4000 || document.hidden || window.scrollY > innerHeight) return;
+    const b = pts[Math.floor(pts.length * (0.35 + Math.random() * 0.3))];
+    poke(b.x, b.y, 7 * dpr);
+  }, 2600);
+
+  addEventListener('resize', layout);
+  if (tg) tg.onEvent('viewportChanged', layout);
+  layout();
+}
+
+/* ---------- ПЕРЕХІД: ПОСИЛКИ ПАДАЮТЬ ---------- */
+const PILE = [
+  {t: 'np', w: 150, h: 100, d: 110, x: -100, b: 0, ry: 28},
+  {t: 'me', w: 130, h: 110, d: 100, x: 55, b: 0, ry: -22},
+  {t: 'np', w: 90, h: 76, d: 86, x: 150, b: 0, ry: 35},
+  {t: 'me', w: 118, h: 88, d: 96, x: -55, b: 104, ry: 12},
+  {t: 'np', w: 100, h: 70, d: 80, x: 70, b: 112, ry: -16},
+  {t: 'me', w: 84, h: 64, d: 76, x: -150, b: 102, ry: 40},
+  {t: 'np', w: 92, h: 78, d: 84, x: 5, b: 194, ry: 22},
+];
+function face(t, cls) {
+  const front = t === 'np'
+    ? '<div class="npl"><i></i><b>нова<br>пошта</b></div><div class="ico">↑↑ ☂</div>'
+    : '<div class="mel">MEEST<small>CHINA</small></div><div class="code"></div>';
+  return `<div class="f ${cls}">${cls === 'fr' || cls === 'bk' ? front : ''}</div>`;
+}
+function buildPile() {
+  const pile = $('#pile');
+  pile.innerHTML = PILE.map(b => `<div class="cube ${b.t}" style="--w:${b.w}px;--h:${b.h}px;--d:${b.d}px">${['fr', 'bk', 'lt', 'rt', 'tp'].map(c => face(b.t, c)).join('')}</div>`).join('');
+  const cubes = [...pile.children], sec = $('#drop'), title = $('#dropTitle'), bar = $('#trackBar'), st = $('#trackSt');
+  const stops = ['ВІДПРАВЛЕННЯ ПРИЙНЯТО · ГУАНЧЖОУ', 'MEEST CHINA → КОРДОН · ЛЬВІВ', 'НОВА ПОШТА · ВЕЗЕМО У ВІДДІЛЕННЯ', 'ПРИБУЛО · ЗАБИРАЙ'];
+  const ease = t => 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2); // easeOutBack — легкий відскок від підлоги
+  let stage = -1;
+  function upd() {
+    const r = sec.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, -r.top / (r.height - innerHeight)));
+    const sc = Math.min(1, innerWidth / 420);
+    cubes.forEach((el, i) => {
+      const b = PILE[i], t = Math.min(1, Math.max(0, (p - i * 0.08) / 0.32)), e = ease(t);
+      const y = -(1 - e) * innerHeight * 1.1 - b.b * sc;
+      const rot = (1 - t) * (i % 2 ? 160 : -140);
+      el.style.transform = `translate3d(${b.x * sc}px,${y}px,0) scale(${sc}) rotateX(-18deg) rotateY(${b.ry + rot}deg) rotateZ(${(1 - t) * 25}deg)`;
+      el.style.opacity = t > 0 ? 1 : 0;
+    });
+    bar.style.width = p * 100 + '%';
+    const s = Math.min(3, Math.floor(p * 4.2));
+    if (s !== stage) {
+      stage = s; st.textContent = stops[s];
+      for (let i = 0; i < 4; i++) $('#p' + i).classList.toggle('on', i <= s);
+      title.textContent = s === 3 ? 'Прибуло' : 'В дорозі';
+      title.classList.toggle('arrived', s === 3);
+      if (s > 0) haptic('rigid');
+    }
+  }
+  addEventListener('scroll', () => requestAnimationFrame(upd), {passive: true});
+  addEventListener('resize', upd);
+  upd();
+}
+
+/* ---------- КАТАЛОГ ---------- */
+const state = {q: '', cat: 'Усі', size: null, sort: 'pop'};
+function chips() {
+  $('#fCat').innerHTML = ['Усі', 'Худі', 'Зіп-худі', 'Світшоти'].map(c => `<button class="tape ${state.cat === c ? 'on' : ''}" data-c="${c}">${c}</button>`).join('');
+  $('#fSize').innerHTML = SIZES.map(s => `<button class="tape sz m ${state.size === s ? 'on' : ''}" data-s="${s}">${s}</button>`).join('');
+}
+$('#fCat').onclick = e => { const b = e.target.closest('[data-c]'); if (!b) return; state.cat = b.dataset.c; haptic(); chips(); render(); };
+$('#fSize').onclick = e => { const b = e.target.closest('[data-s]'); if (!b) return; state.size = state.size === b.dataset.s ? null : b.dataset.s; haptic(); chips(); render(); };
+$('#q').oninput = e => { state.q = e.target.value.trim().toLowerCase(); render(); };
+$('#sort').onchange = e => { state.sort = e.target.value; render(); };
+
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), {threshold: .15});
+function render() {
+  let list = PRODUCTS.filter(p =>
+    (state.cat === 'Усі' || p.cat === state.cat) &&
+    (!state.size || p.sizes.includes(state.size)) &&
+    (!state.q || (p.name + ' ' + p.col + ' ' + p.cat).toLowerCase().includes(state.q)));
+  list.sort(state.sort === 'asc' ? (a, b) => a.price - b.price : state.sort === 'desc' ? (a, b) => b.price - a.price : (a, b) => b.pop - a.pop);
+  $('#count').textContent = `ЗНАЙДЕНО КОРОБОК: ${list.length}`;
+  const strip = c => (c === 'np' ? 'НОВА ПОШТА · КРИХКЕ · ' : 'MEEST CHINA · CN → UA · ').repeat(6);
+  $('#grid').innerHTML = list.length ? list.map((p, i) => `
+    <article class="card ${p.car}" data-id="${p.id}" style="transition-delay:${(i % 2) * 70}ms">
+      <div class="strip"><span>${strip(p.car)}${strip(p.car)}</span></div>
+      <div class="ph"><img src="${p.img[0]}" alt="${p.name}" loading="lazy"></div>
+      ${p.badge ? `<span class="badge ${p.old ? 'sale' : ''}">${p.badge}</span>` : ''}
+      <div class="lbl">
+        <div class="ttn">ТТН ${p.ttn}</div>
+        <h3>${p.name}</h3>
+        <div class="pr"><b>${uah(p.price)}</b>${p.old ? `<s>${uah(p.old)}</s>` : ''}</div>
+        <div class="bar"></div>
+      </div>
+    </article>`).join('') : '<div class="empty">ПОРОЖНЯ КОРОБКА.<br>СПРОБУЙ ІНШИЙ ФІЛЬТР</div>';
+  document.querySelectorAll('.card').forEach(c => io.observe(c));
+}
+$('#grid').onclick = e => { const c = e.target.closest('.card'); if (c) openItem(+c.dataset.id); };
+
+/* ---------- МОДАЛКА ---------- */
+let cur = null, pick = null;
+function openItem(id) {
+  cur = PRODUCTS.find(p => p.id === id); pick = null;
+  haptic('medium');
+  $('#mTtn').textContent = `ТТН ${cur.ttn} · ${cur.car === 'np' ? 'НОВА ПОШТА' : 'MEEST CHINA'}`;
+  $('#mFlap').className = 'flap t ' + (cur.car === 'np' ? 'np-tape' : 'me-tape');
+  const labels = ['Спереду', 'Ззаду', 'Деталь'];
+  $('#gal').innerHTML = cur.img.map((s, i) => `<img src="${s}" alt="${cur.name} — ${labels[i]}">`).join('');
+  $('#gal').scrollLeft = 0;
+  $('#dots').innerHTML = cur.img.map((s, i) => `<button class="${i ? '' : 'on'}" data-i="${i}" aria-label="${labels[i]}"><img src="${s}" alt=""></button>`).join('');
+  $('#slip').innerHTML = `
+    <div class="k">ПАКУВАЛЬНИЙ ЛИСТ · ${cur.cat.toUpperCase()}</div>
+    <h2>${cur.name}</h2>
+    <div class="pr"><b>${uah(cur.price)}</b>${cur.old ? `<s>${uah(cur.old)}</s>` : ''}</div>
+    <div class="sec"><div class="k">РОЗМІР</div>
+      <div class="szs" id="szs">${SIZES.map(s => `<button data-s="${s}" ${cur.sizes.includes(s) ? '' : 'disabled'}>${s}</button>`).join('')}</div></div>
+    <div class="sec"><div class="k">ОПИС</div><p class="desc">${cur.desc}</p></div>
+    <div class="sec" style="border:0"><div class="k">ХАРАКТЕРИСТИКИ</div>
+      <table class="spec">
+        <tr><td>Колір</td><td>${cur.col}</td></tr>
+        <tr><td>Склад</td><td>80% бавовна / 20% поліестер</td></tr>
+        <tr><td>Щільність</td><td>${cur.hood ? 380 : 320} г/м²</td></tr>
+        <tr><td>Посадка</td><td>Оверсайз</td></tr>
+        <tr><td>Доставка</td><td>Нова Пошта · 1–2 дні</td></tr>
+      </table></div>
+    <button class="buy" id="buy">Замовити · ${uah(cur.price)}</button>
+    <div class="note">ЦЕ ДЕМО-ВЕРСІЯ — ЗАМОВЛЕННЯ НЕ ОФОРМЛЮЄТЬСЯ</div>`;
+  $('#modal').scrollTop = 0;
+  $('#modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (tg) tg.BackButton.show();
+}
+function closeItem() {
+  $('#modal').classList.remove('open');
+  document.body.style.overflow = '';
+  if (tg) tg.BackButton.hide();
+}
+$('#mClose').onclick = closeItem;
+if (tg) tg.BackButton.onClick(closeItem);
+addEventListener('keydown', e => { if (e.key === 'Escape') closeItem(); });
+$('#dots').onclick = e => { const b = e.target.closest('[data-i]'); if (b) $('#gal').scrollTo({left: b.dataset.i * $('#gal').clientWidth, behavior: 'smooth'}); };
+$('#gal').addEventListener('scroll', e => {
+  const i = Math.round(e.target.scrollLeft / e.target.clientWidth);
+  document.querySelectorAll('#dots button').forEach((b, j) => b.classList.toggle('on', i === j));
+}, {passive: true});
+$('#slip').onclick = e => {
+  const s = e.target.closest('#szs [data-s]');
+  if (s && !s.disabled) { pick = s.dataset.s; document.querySelectorAll('#szs button').forEach(b => b.classList.toggle('on', b === s)); haptic(); return; }
+  if (e.target.id !== 'buy') return;
+  if (!pick) {
+    const z = $('#szs'); z.classList.remove('shake'); void z.offsetWidth; z.classList.add('shake');
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+    return;
+  }
+  const msg = `Демо-версія: «${cur.name}», розмір ${pick}, ${uah(cur.price)}. У повній версії тут буде оформлення замовлення.`;
+  tg && tg.showAlert ? tg.showAlert(msg) : alert(msg);
+};
+
+/* ---------- СТАРТ ---------- */
+(async () => {
+  await Promise.all([document.fonts.load('40px "Dela Gothic One"'), document.fonts.load('800 14px "JetBrains Mono"')]).catch(() => {});
+  // фото товарів поки що генеруємо; у повній версії тут будуть реальні фото
+  for (const p of PRODUCTS) {
+    const f = await makeTex(p, false), b = await makeTex(p, true);
+    p.img = [f.toDataURL(), b.toDataURL(), cropDetail(f, p).toDataURL()];
+  }
+  chips(); render(); buildPile();
+  jelly($('#hoodie'), await makeTex(PRODUCTS[0], false, 2));
+})();
+</script>
+</body>
+</html>
